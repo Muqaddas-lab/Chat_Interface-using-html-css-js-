@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Chat Scroll Gradient</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: #688fca;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .chat-container {
+      width: 400px;
+      height: 600px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.2);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chat-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+      background: #d77ebf;
+      color: white;
+      padding: 0 15px;
+      z-index: 2;
+    }
+
+    .profile-pic {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .user-info {
+      flex: 1;
+      margin-left: 10px;
+    }
+
+    .user-info .name {
+      font-weight: bold;
+      font-size: 1em;
+    }
+
+    .user-info .status {
+      font-size: 0.8em;
+      color: #f1e0f1;
+    }
+
+    .icons {
+      display: flex;
+      gap: 10px;
+      font-size: 1.2em;
+      cursor: pointer;
+    }
+
+    .chat-messages {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+      background: #fafafa;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: background-color 0.3s ease;
+    }
+
+    .message {
+      max-width: 70%;
+      padding: 10px 15px;
+      border-radius: 25px;
+      line-height: 1.3;
+      word-wrap: break-word;
+      transition: background 0.3s ease;
+    }
+
+    .message.left {
+      align-self: flex-start;
+      background-color: rgb(190, 186, 186);
+      color: black;
+    }
+
+    .message.right {
+      align-self: flex-end;
+      background: #d77ebf;
+      color: white;
+    }
+
+    .chat-input {
+      padding: 10px;
+      background: #f7f1f7;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .chat-input input {
+      padding: 10px 15px;
+      border-radius: 25px;
+      border: 1px solid #ccc;
+      outline: none;
+      font-size: 1em;
+      width: 40%;
+    }
+
+    #leftInput {
+      text-align: left;
+    }
+
+    #rightInput {
+      text-align: right;
+    }
+
+    .chat-input button {
+      flex: 1;
+      background-color: #d77ebf;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.3s ease;
+    }
+
+    .chat-input button:hover {
+      background-color: #b25b96;
+    }
+  </style>
+</head>
+<body>
+
+<div class="chat-container">
+  <div class="chat-header">
+    <img src="/profile.jpg" class="profile-pic" alt="Profile" />
+    <div class="user-info">
+      <div class="name">Friend person</div>
+      <div class="status">Active now</div>
+    </div>
+    <div class="icons">
+      <span>📹</span>
+      <span>📞</span>
+      <span>⚙️</span>
+    </div>
+  </div>
+
+  <div class="chat-messages" id="chatBody"></div>
+
+  <div class="chat-input">
+    <input type="text" id="leftInput" placeholder="Left user" onkeydown="checkEnter(event)">
+    <input type="text" id="rightInput" placeholder="Right user" onkeydown="checkEnter(event)">
+    <button onclick="sendBothMessages()">Send</button>
+    <button onclick="clearChat()">Clear</button>
+  </div>
+</div>
+
+<script>
+  const chatBody = document.getElementById("chatBody");
+
+  function sendBothMessages() {
+    const leftInput = document.getElementById("leftInput");
+    const rightInput = document.getElementById("rightInput");
+
+    let leftMsg = leftInput.value.trim();
+    let rightMsg = rightInput.value.trim();
+
+    if (leftMsg !== "") {
+      const leftMessage = document.createElement("div");
+      leftMessage.className = "message left";
+      leftMessage.textContent = leftMsg;
+      chatBody.appendChild(leftMessage);
+    }
+
+    if (rightMsg !== "") {
+      const rightMessage = document.createElement("div");
+      rightMessage.className = "message right";
+      rightMessage.textContent = rightMsg;
+      chatBody.appendChild(rightMessage);
+    }
+
+    leftInput.value = "";
+    rightInput.value = "";
+
+    chatBody.scrollTop = chatBody.scrollHeight;
+    saveMessages();
+    updateRightMessageColors();
+  }
+
+  function checkEnter(e) {
+    if (e.key === "Enter") {
+      sendBothMessages();
+    }
+  }
+
+  function updateRightMessageColors() {
+    const scrollTop = chatBody.scrollTop;
+    const scrollHeight = chatBody.scrollHeight - chatBody.clientHeight;
+    const scrollPercent = scrollHeight > 0 ? scrollTop / scrollHeight : 0;
+
+    const startColor = [215, 126, 191];
+    const endColor = [112, 55, 165];
+
+    const r = Math.round(startColor[0] + (endColor[0] - startColor[0]) * scrollPercent);
+    const g = Math.round(startColor[1] + (endColor[1] - startColor[1]) * scrollPercent);
+    const b = Math.round(startColor[2] + (endColor[2] - startColor[2]) * scrollPercent);
+
+    const newColor = `rgb(${r}, ${g}, ${b})`;
+
+    const rightMessages = document.querySelectorAll('.message.right');
+    rightMessages.forEach(msg => {
+      msg.style.background = newColor;
+    });
+  }
+
+  chatBody.addEventListener("scroll", updateRightMessageColors);
+
+  function saveMessages() {
+    const messages = [];
+    document.querySelectorAll(".chat-messages .message").forEach(msg => {
+      messages.push({ text: msg.textContent, side: msg.classList.contains("right") ? "right" : "left" });
+    });
+    localStorage.setItem("chatMessages", JSON.stringify(messages));
+  }
+
+  function loadMessages() {
+    const saved = JSON.parse(localStorage.getItem("chatMessages") || "[]");
+    saved.forEach(msg => {
+      const div = document.createElement("div");
+      div.className = `message ${msg.side}`;
+      div.textContent = msg.text;
+      chatBody.appendChild(div);
+    });
+    chatBody.scrollTop = chatBody.scrollHeight;
+    updateRightMessageColors();
+  }
+
+  function clearChat() {
+    chatBody.innerHTML = "";
+    localStorage.removeItem("chatMessages");
+  }
+
+  loadMessages();
+</script>
+
+</body>
+</html>
